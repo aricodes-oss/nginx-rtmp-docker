@@ -4,6 +4,7 @@
 
 - We build with a more recent version of `nginx`
 - We build with a fork of the `nginx-rtmp` plugin that supports HLS timestamps
+- We support both 32-bit and 64-bit `arm` architectures
 
 ## Supported tags and respective `Dockerfile` links
 
