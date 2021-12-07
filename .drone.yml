@@ -21,4 +21,3 @@ steps:
       repo: aricodes/nginx-rtmp
       tags:
         - latest
-        - amd64-latest
