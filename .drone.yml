@@ -1,6 +1,10 @@
 kind: pipeline
 type: docker
-name: Build x86 image
+name: Build multiarch image
+
+platform:
+  os: linux
+  arch: arm64
 
 steps:
   - name: Build
