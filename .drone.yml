@@ -5,6 +5,7 @@ name: Build x86 image
 steps:
   - name: Build
     image: thegeeklab/drone-docker-buildx
+    privileged: true
     settings:
       platforms:
         - linux/amd64
