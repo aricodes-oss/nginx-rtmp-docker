@@ -1,0 +1,42 @@
+kind: pipeline
+type: docker
+name: Build ARM image
+
+platform:
+  os: linux
+  arch: arm64
+
+steps:
+  - name: Build
+    image: plugins/docker
+    settings:
+      mirror:
+        from_secret: DOCKER_MIRROR
+      username:
+        from_secret: DOCKER_USERNAME
+      password:
+        from_secret: DOCKER_PASSWORD
+      repo: aricodes/nginx-rtmp
+      tags:
+        - latest
+        - arm64-latest
+
+---
+kind: pipeline
+type: docker
+name: Build x86 image
+
+steps:
+  - name: Build
+    image: plugins/docker
+    settings:
+      mirror:
+        from_secret: DOCKER_MIRROR
+      username:
+        from_secret: DOCKER_USERNAME
+      password:
+        from_secret: DOCKER_PASSWORD
+      repo: aricodes/nginx-rtmp
+      tags:
+        - latest
+        - amd64-latest
