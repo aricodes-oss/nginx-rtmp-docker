@@ -7,6 +7,7 @@ steps:
     image: thegeeklab/drone-docker-buildx
     privileged: true
     settings:
+      experimental: true
       platforms:
         - linux/amd64
         - linux/arm64
