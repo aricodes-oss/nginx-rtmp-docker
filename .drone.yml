@@ -2,11 +2,15 @@ kind: pipeline
 type: docker
 name: Build multiarch image
 
-platform:
-  os: linux
-  arch: arm64
-
 steps:
+  - name: Binfmt
+    image: tonistiigi/binfmt
+    privileged: true
+    entrypoint:
+      - /usr/bin/binfmt
+      - --install
+      - all
+
   - name: Build
     image: thegeeklab/drone-docker-buildx
     privileged: true
@@ -14,6 +18,7 @@ steps:
       experimental: true
       platforms:
         - linux/amd64
+        - linux/386
         - linux/arm64
         - linux/arm
       mirror:
