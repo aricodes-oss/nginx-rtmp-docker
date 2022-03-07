@@ -1,6 +1,26 @@
+---
 kind: pipeline
 type: docker
-name: Build multiarch image
+name: amd64
+
+steps:
+  - name: Build
+    image: plugins/docker
+    settings:
+      mirror:
+        from_secret: DOCKER_MIRROR
+      username:
+        from_secret: DOCKER_USERNAME
+      password:
+        from_secret: DOCKER_PASSWORD
+      repo: aricodes/nginx-rtmp
+      tags:
+        - amd64
+
+---
+kind: pipeline
+type: docker
+name: i386
 
 steps:
   - name: Binfmt
@@ -17,9 +37,64 @@ steps:
     settings:
       experimental: true
       platforms:
-        - linux/amd64
         - linux/386
-        - linux/arm64
+      mirror:
+        from_secret: DOCKER_MIRROR
+      username:
+        from_secret: DOCKER_USERNAME
+      password:
+        from_secret: DOCKER_PASSWORD
+      repo: aricodes/nginx-rtmp
+      tags:
+        - i386
+
+---
+kind: pipeline
+type: docker
+name: arm64
+
+platform:
+  os: linux
+  arch: arm64
+
+steps:
+  - name: Build
+    image: plugins/docker
+    settings:
+      mirror:
+        from_secret: DOCKER_MIRROR
+      username:
+        from_secret: DOCKER_USERNAME
+      password:
+        from_secret: DOCKER_PASSWORD
+      repo: aricodes/nginx-rtmp
+      tags:
+        - arm64
+
+---
+kind: pipeline
+type: docker
+name: arm32
+
+platform:
+  os: linux
+  arch: arm64
+
+steps:
+  - name: Binfmt
+    image: tonistiigi/binfmt
+    privileged: true
+    entrypoint:
+      - /usr/bin/binfmt
+      - --install
+      - all
+
+  - name: Build
+    image: thegeeklab/drone-docker-buildx
+    privileged: true
+    settings:
+      experimental: true
+      platforms:
         - linux/arm
       mirror:
         from_secret: DOCKER_MIRROR
@@ -29,4 +104,33 @@ steps:
         from_secret: DOCKER_PASSWORD
       repo: aricodes/nginx-rtmp
       tags:
-        - latest
+        - arm
+
+---
+kind: pipeline
+type: docker
+name: Publish
+
+depends_on:
+  - amd64
+  - i386
+  - arm64
+  - arm32
+
+platform:
+  os: linux
+  arch: arm64
+
+steps:
+  - name: Tag manifest
+    image: docker:dind
+    privileged: true
+    environment:
+      username:
+        from_secret: DOCKER_USERNAME
+      password:
+        from_secret: DOCKER_PASSWORD
+    commands:
+      - docker login -u $username -p $password
+      - docker manifest create aricodes/nginx-rtmp:latest --amend aricodes/nginx-rtmp:amd64 --amend aricodes/nginx-rtmp:i386 --amend aricodes/nginx-rtmp:arm64 --amend aricodes/nginx-rtmp:arm
+      - docker manifest push aricodes/nginx-rtmp:latest
